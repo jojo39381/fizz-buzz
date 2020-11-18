@@ -27,6 +27,8 @@ module.exports.AnswerIntentHandler = AnswerIntentHandler = {
     }
   };
 
+
+
 // change the gamemode to hard -> make the number larger
 module.exports.HardModeIntentHandler = HardModeIntentHandler = {
     canHandle(handlerInput) {
@@ -50,6 +52,7 @@ module.exports.HardModeIntentHandler = HardModeIntentHandler = {
         
     }
 };
+
 
   // start the game and set session attributes to save progress
 function startGame(handlerInput) {
@@ -82,6 +85,7 @@ function handlerUserAnswer(handlerInput) {
     var correctAnswer = sessionAttributes.correctAnswer
     const nextNumber = currentNumber + 1
     const nextUserResponseNumber = currentNumber + 2
+    
     var speechOutput = ""
     var sessionEnd = false
     var userAnswer = null
