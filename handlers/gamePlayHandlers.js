@@ -74,9 +74,6 @@ function startGame(handlerInput) {
 
 // handle user responses and determine if it is valid and correct
 function handlerUserAnswer(handlerInput) {
-
-
-    
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     const currentNumber = sessionAttributes.currentNumber
     const { intent } = handlerInput.requestEnvelope.request
@@ -85,7 +82,7 @@ function handlerUserAnswer(handlerInput) {
     var correctAnswer = sessionAttributes.correctAnswer
     const nextNumber = currentNumber + 1
     const nextUserResponseNumber = currentNumber + 2
-    
+
     var speechOutput = ""
     var sessionEnd = false
     var userAnswer = null
@@ -111,11 +108,11 @@ function handlerUserAnswer(handlerInput) {
         // correctAnswer:
 
         setSessionAttributes(nextNumber, nextUserResponseNumber, correctAnswer, handlerInput)
-
     } else {
         sessionEnd = true
         speechOutput = `I'm sorry, the correct response was ${correctAnswer}. You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz!`
     }
+    
     return handlerInput.responseBuilder
     .speak(speechOutput)
     .reprompt(speechOutput)
