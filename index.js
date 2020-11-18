@@ -56,18 +56,26 @@ function handlerUserAnswer(handlerInput) {
     if (userAnswer == correctAnswer) {
         console.log(nextResponseNumber)
         if (nextResponseNumber % 3 == 0 && nextResponseNumber % 5 == 0) {
+            console.log("changed")
             correctAnswer = "fizz buzz"
+            console.log(correctAnswer)
             
         }
-        if (nextResponseNumber % 3 == 0) {
+        else if (nextResponseNumber % 3 == 0) {
+            console.log("changed")
             correctAnswer = "fizz"
+            console.log(correctAnswer)
         }
-        if (nextResponseNumber % 5 == 0) {
+        else if (nextResponseNumber % 5 == 0) {
+            console.log("changed")
             correctAnswer = "buzz"
+            console.log(correctAnswer)
         }
         else {
+            console.log("error")
             correctAnswer = nextResponseNumber
         }
+        console.log(correctAnswer)
         const sessionAttributes = {}
         Object.assign(sessionAttributes, {
             currentNumber: nextResponseNumber,
@@ -78,7 +86,7 @@ function handlerUserAnswer(handlerInput) {
         speechOutput = (nextNumber).toString()
 
     } else {
-        speechOutput = "Iâ€™m sorry, the correct response was " + correctAnswer + "You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz"
+        speechOutput = "I am sorry, the correct response was " + correctAnswer + "You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz"
     }
     return handlerInput.responseBuilder
     .speak(speechOutput)
