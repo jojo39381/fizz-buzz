@@ -71,11 +71,13 @@ const RepeatIntentHandler = {
         // get last number said by Alexa
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         const lastNumber = sessionAttributes.lastNumber
-        const speechText = `${lastNumber}`
+        const lastResponse = checkFizzBuzz(lastNumber)
+        const speechText = `${lastResponse}`
 
         return handlerInput.responseBuilder
         .speak(speechText)
         .withSimpleCard('Hello World', speechText)
+        .withShouldEndSession(false)
         .getResponse();
     }
 };
@@ -107,17 +109,28 @@ const ErrorHandler = {
     },
   };
   
-
+const FallBackIntentHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent';
+    },
+    handle(handlerInput) {
+        
+        return handlerInput.responseBuilder
+        .speak('Sorry, I did not understand your response, please try again.')
+        .reprompt('Sorry, I did not understand your response, please try again.')
+        .getResponse();
+    }
+};
 // start the game and set session attributes to save progress
 function startGame(handlerInput) {
-    const speechOutput = "Welcome to Fizz Buzz. Weâ€™ll each take turns counting up from one. However, you must replace numbers divisible by 3 with the word â€œfizzâ€ and you must replace numbers divisible by 5 with the word â€œbuzzâ€. If a number is divisible by both 3 and 5, you should instead say â€œfizz buzzâ€. If you get one wrong, you lose. OK, Iâ€™ll start... One."
-
+    const speechOutput = "Welcome to Fizz Buzz. Weâ€™ll each take turns counting up from one. However, you must replace numbers divisible by 3 with the word â€œfizzâ€ and you must replace numbers divisible by 5 with the word â€œbuzzâ€. If a number is divisible by both 3 and 5, you should instead say â€œfizz buzzâ€. If you get one wrong, you lose. ... OK, Iâ€™ll start... One."
     // initialize game and set session attributes
     const sessionAttributes = {}
     Object.assign(sessionAttributes, {
-        lastNumber: 1,
-        currentNumber: 2,
-        correctAnswer: 2,
+        lastNumber: 14,
+        currentNumber: 15,
+        correctAnswer: 'fizz buzz',
         score: 0
         
       });
@@ -143,29 +156,11 @@ function handlerUserAnswer(handlerInput) {
     var sessionEnd = false
     // determine if user answer is correct and set the session attributes for the next input
     if (userAnswer == correctAnswer) {
-        console.log(nextResponseNumber)
-        if (nextResponseNumber % 3 == 0 && nextResponseNumber % 5 == 0) {
-            console.log("changed")
-            correctAnswer = "fizz buzz"
-            console.log(correctAnswer)
-            
-        }
-        else if (nextResponseNumber % 3 == 0) {
-            console.log("changed")
-            correctAnswer = "fizz"
-            console.log(correctAnswer)
-        }
-        else if (nextResponseNumber % 5 == 0) {
-            console.log("changed")
-            correctAnswer = "buzz"
-            console.log(correctAnswer)
-        }
-        else {
-            console.log("error")
-            correctAnswer = nextResponseNumber
-        }
-        console.log(correctAnswer)
+        
         // set the session attributes for the next input
+        speechOutput = checkFizzBuzz(nextNumber).toString()
+        correctAnswer = checkFizzBuzz(nextResponseNumber)
+        
         const sessionAttributes = {}
         Object.assign(sessionAttributes, {
             lastNumber: nextNumber,
@@ -174,12 +169,11 @@ function handlerUserAnswer(handlerInput) {
             score: 0
         });
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
-        speechOutput = (nextNumber).toString()
+        
 
     } else {
-
         sessionEnd = true
-        speechOutput = `I am sorry, the correct response was ${correctAnswer}. You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz`
+        speechOutput = `I'm sorry, the correct response was ${correctAnswer}. You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz`
     }
     return handlerInput.responseBuilder
     .speak(speechOutput)
@@ -189,6 +183,29 @@ function handlerUserAnswer(handlerInput) {
 
 }
 
+function checkFizzBuzz(number) {
+    if (number % 3 == 0 && number % 5 == 0) {
+        
+        return "fizz buzz"
+        
+    }
+    else if (number % 3 == 0) {
+        
+        correctAnswer = "fizz"
+       
+        return "fizz"
+    }
+    else if (number % 5 == 0) {
+        
+        correctAnswer = "buzz"
+        
+        return "buzz"
+    }
+    else {
+        
+        return number
+    }
+}
 
 
 exports.handler = Alexa.SkillBuilders.custom()
@@ -197,6 +214,8 @@ exports.handler = Alexa.SkillBuilders.custom()
     AnswerIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
-    SessionEndedRequestHandler)
+    SessionEndedRequestHandler,
+    FallBackIntentHandler,
+    RepeatIntentHandler)
     .addErrorHandlers(ErrorHandler)
     .lambda();
