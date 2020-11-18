@@ -14,6 +14,17 @@ const LaunchRequestHandler = {
 };
 
 
+// handle intent request and check if it is an answer intent
+const AnswerIntentHandler = {
+    canHandle(handlerInput) {
+      return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        && handlerInput.requestEnvelope.request.intent.name === 'AnswerIntent';
+    },
+    handle(handlerInput) {
+        return handlerUserAnswer(handlerInput)
+        
+    }
+  };
 
   
 
