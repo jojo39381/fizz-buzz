@@ -25,7 +25,7 @@ const AnswerIntentHandler = {
     }
   };
 
-// handle help intent request
+// handle help intent request and provide help
 const HelpIntentHandler = {
     canHandle(handlerInput) {
       return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -42,43 +42,84 @@ const HelpIntentHandler = {
     }
   };
 
-  const CancelAndStopIntentHandler = {
+
+// handle cancel and stop intent requests and end the session
+const CancelAndStopIntentHandler = {
     canHandle(handlerInput) {
-      return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && (handlerInput.requestEnvelope.request.intent.name === 'AMAZON.CancelIntent'
-          || handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StopIntent');
+            || handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StopIntent');
     },
     handle(handlerInput) {
-      const speechText = 'Thanks for playing Fizz Buzz! Have a good day!';
-  
-      return handlerInput.responseBuilder
+        const speechText = 'Thanks for playing Fizz Buzz! Have a good day!';
+
+        return handlerInput.responseBuilder
         .speak(speechText)
         .withSimpleCard('Hello World', speechText)
         .withShouldEndSession(true)
         .getResponse();
     }
-  };
+};
 
-  const SessionEndedRequestHandler = {
+// handle repeat intent requests and repeat the previous number said by Alexa
+const RepeatIntentHandler = {
     canHandle(handlerInput) {
-      return handlerInput.requestEnvelope.request.type === 'SessionEndedRequest';
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.RepeatIntent';
     },
     handle(handlerInput) {
-      //any cleanup logic goes here
-      return handlerInput.responseBuilder.getResponse();
-    }
-  };
+        // get last number said by Alexa
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const lastNumber = sessionAttributes.lastNumber
+        const speechText = `${lastNumber}`
 
+        return handlerInput.responseBuilder
+        .speak(speechText)
+        .withSimpleCard('Hello World', speechText)
+        .getResponse();
+    }
+};
+
+// handle session end
+const SessionEndedRequestHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'SessionEndedRequest';
+    },
+    handle(handlerInput) {
+        //any cleanup logic goes here
+        return handlerInput.responseBuilder.getResponse();
+    }
+};
+
+
+// handles errors and prompts the user to try again
+const ErrorHandler = {
+    canHandle() {
+      return true;
+    },
+    handle(handlerInput, error) {
+      console.log(`Error handled: ${error.message}`);
+  
+      return handlerInput.responseBuilder
+        .speak('Sorry, I did not understand your response, please try again.')
+        .reprompt('Sorry, I did not understand your response, please try again.')
+        .getResponse();
+    },
+  };
   
 
 // start the game and set session attributes to save progress
 function startGame(handlerInput) {
-    const speechOutput = "welcome to game"
+    const speechOutput = "Welcome to Fizz Buzz. Weâ€™ll each take turns counting up from one. However, you must replace numbers divisible by 3 with the word â€œfizzâ€ and you must replace numbers divisible by 5 with the word â€œbuzzâ€. If a number is divisible by both 3 and 5, you should instead say â€œfizz buzzâ€. If you get one wrong, you lose. OK, Iâ€™ll start... One."
+
+    // initialize game and set session attributes
     const sessionAttributes = {}
     Object.assign(sessionAttributes, {
+        lastNumber: 1,
         currentNumber: 2,
         correctAnswer: 2,
         score: 0
+        
       });
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
     return handlerInput.responseBuilder
@@ -88,6 +129,8 @@ function startGame(handlerInput) {
 
 }
 
+
+// handle user responses and determine if it is valid and correct
 function handlerUserAnswer(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     const currentNumber = sessionAttributes.currentNumber
@@ -97,8 +140,8 @@ function handlerUserAnswer(handlerInput) {
     const nextNumber = currentNumber + 1
     const nextResponseNumber = currentNumber + 2
     var speechOutput = ""
-    
-
+    var sessionEnd = false
+    // determine if user answer is correct and set the session attributes for the next input
     if (userAnswer == correctAnswer) {
         console.log(nextResponseNumber)
         if (nextResponseNumber % 3 == 0 && nextResponseNumber % 5 == 0) {
@@ -122,8 +165,10 @@ function handlerUserAnswer(handlerInput) {
             correctAnswer = nextResponseNumber
         }
         console.log(correctAnswer)
+        // set the session attributes for the next input
         const sessionAttributes = {}
         Object.assign(sessionAttributes, {
+            lastNumber: nextNumber,
             currentNumber: nextResponseNumber,
             correctAnswer: correctAnswer,
             score: 0
@@ -132,14 +177,19 @@ function handlerUserAnswer(handlerInput) {
         speechOutput = (nextNumber).toString()
 
     } else {
-        speechOutput = `I’m sorry, the correct response was ${correctAnswer}. You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz`
+
+        sessionEnd = true
+        speechOutput = `I am sorry, the correct response was ${correctAnswer}. You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz`
     }
     return handlerInput.responseBuilder
     .speak(speechOutput)
     .reprompt(speechOutput)
+    .withShouldEndSession(sessionEnd)
     .getResponse();
 
 }
+
+
 
 exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
@@ -148,4 +198,5 @@ exports.handler = Alexa.SkillBuilders.custom()
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler)
-  .lambda();
+    .addErrorHandlers(ErrorHandler)
+    .lambda();
