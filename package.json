@@ -1,0 +1,22 @@
+{
+  "name": "fizz-buzz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jojo39381/fizz-buzz.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jojo39381/fizz-buzz/issues"
+  },
+  "homepage": "https://github.com/jojo39381/fizz-buzz#readme",
+  "dependencies": {
+    "ask-sdk": "^2.10.0"
+  }
+}
