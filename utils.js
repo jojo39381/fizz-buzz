@@ -76,3 +76,4 @@ module.exports.setSessionAttributes = function setSessionAttributes(lastNumber, 
     });
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
 }
+
