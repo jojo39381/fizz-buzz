@@ -1,5 +1,5 @@
 // handles errors and prompts the user to try again
-module.exports.ErrorHandler = ErrorHandler = {
+module.exports = ErrorHandler = {
     canHandle() {
       return true;
     },
@@ -15,7 +15,7 @@ module.exports.ErrorHandler = ErrorHandler = {
   };
 
 // handles when alexa doesn't understand the response, prompts the user to try again
-module.exports.FallbackIntentHandler = FallbackIntentHandler = {
+module.exports = FallbackIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent';
@@ -31,7 +31,7 @@ module.exports.FallbackIntentHandler = FallbackIntentHandler = {
 };
 
 // handle session end
-module.exports.SessionEndedRequestHandler = SessionEndedRequestHandler = {
+module.exports = SessionEndedRequestHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'SessionEndedRequest';
     },

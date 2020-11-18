@@ -1,6 +1,6 @@
 const {checkFizzBuzz, setSessionAttributes}= require('../utils.js');
 // handle launch request
-module.exports.LaunchRequestHandler = LaunchRequestHandler = {
+module.exports = LaunchRequestHandler = {
     canHandle(handlerInput) {
       return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
     },
@@ -13,7 +13,7 @@ module.exports.LaunchRequestHandler = LaunchRequestHandler = {
 
 
 // handle intent request and check if it is an answer intent
-module.exports.AnswerIntentHandler = AnswerIntentHandler = {
+module.exports = AnswerIntentHandler = {
     
     canHandle(handlerInput) {
         
@@ -30,7 +30,7 @@ module.exports.AnswerIntentHandler = AnswerIntentHandler = {
 
 
 // change the gamemode to hard -> make the number larger
-module.exports.HardModeIntentHandler = HardModeIntentHandler = {
+module.exports = HardModeIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && handlerInput.requestEnvelope.request.intent.name === 'HardModeIntent';
@@ -112,7 +112,7 @@ function handlerUserAnswer(handlerInput) {
         sessionEnd = true
         speechOutput = `I'm sorry, the correct response was ${correctAnswer}. You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz!`
     }
-    
+
     return handlerInput.responseBuilder
     .speak(speechOutput)
     .reprompt(speechOutput)

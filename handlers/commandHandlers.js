@@ -1,6 +1,6 @@
 const {checkFizzBuzz} = require('../utils.js');
 // handle help intent request and provide help
-module.exports.HelpIntentHandler = HelpIntentHandler = {
+module.exports = HelpIntentHandler = {
     canHandle(handlerInput) {
       return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
@@ -19,7 +19,7 @@ module.exports.HelpIntentHandler = HelpIntentHandler = {
 
 
 // handle cancel and stop intent requests and end the session
-module.exports.CancelAndStopIntentHandler = CancelAndStopIntentHandler = {
+module.exports = CancelAndStopIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && (handlerInput.requestEnvelope.request.intent.name === 'AMAZON.CancelIntent'
@@ -38,7 +38,7 @@ module.exports.CancelAndStopIntentHandler = CancelAndStopIntentHandler = {
 
 
 // handle repeat intent requests and repeat the previous number said by Alexa
-module.exports.RepeatIntentHandler = RepeatIntentHandler = {
+module.exports = RepeatIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.RepeatIntent';

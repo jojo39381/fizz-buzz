@@ -1,5 +1,5 @@
 // check if number should be changed to fizz, buzz, fizzbuzz, or stay the same, and return the change 
-module.exports.checkFizzBuzz = function checkFizzBuzz(number) {
+module.exports = function checkFizzBuzz(number) {
     if (number % 3 == 0 && number % 5 == 0) {
         
         return "fizz buzz"
@@ -24,7 +24,7 @@ module.exports.checkFizzBuzz = function checkFizzBuzz(number) {
 }
 
 // set session attributes to store game progress. lastNumber is the last number alexa said, currentNumber is the number the user will say, and correctAnswer is the right answer
-module.exports.setSessionAttributes = function setSessionAttributes(lastNumber, currentNumber, correctAnswer, handlerInput) {
+module.exports = function setSessionAttributes(lastNumber, currentNumber, correctAnswer, handlerInput) {
     const sessionAttributes = {}
     Object.assign(sessionAttributes, {
         lastNumber: lastNumber,
