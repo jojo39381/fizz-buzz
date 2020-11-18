@@ -1,5 +1,6 @@
+// import alexa sdk
 const Alexa = require('ask-sdk-core');
-
+const UtilFunctions = require('./util.js');
 
 // handle launch request
 const LaunchRequestHandler = {
@@ -8,7 +9,7 @@ const LaunchRequestHandler = {
   },
   handle(handlerInput) {
     
-
+    // start the game
     return startGame(handlerInput)
   }
 };
@@ -18,12 +19,12 @@ const LaunchRequestHandler = {
 const AnswerIntentHandler = {
     
     canHandle(handlerInput) {
-        console.log(handlerInput.requestEnvelope.request.intent.name)
+        
       return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && handlerInput.requestEnvelope.request.intent.name === 'AnswerIntent';
     },
     handle(handlerInput) {
-        console.log(".////////////")
+        // handle user answer
         return handlerUserAnswer(handlerInput)
         
     }
@@ -36,12 +37,12 @@ const HelpIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-      const speechText = 'You can either say a number or a word';
+      const speechText = 'You can either say a number or a word like fizz, buzz, or fizz buzz';
   
       return handlerInput.responseBuilder
         .speak(speechText)
         .reprompt(speechText)
-        .withSimpleCard('Hello World', speechText)
+        .withSimpleCard('Fizz Buzz', speechText)
         .getResponse();
     }
   };
@@ -59,7 +60,7 @@ const CancelAndStopIntentHandler = {
 
         return handlerInput.responseBuilder
         .speak(speechText)
-        .withSimpleCard('Hello World', speechText)
+        .withSimpleCard('Fizz Buzz', speechText)
         .withShouldEndSession(true)
         .getResponse();
     }
@@ -80,7 +81,7 @@ const RepeatIntentHandler = {
 
         return handlerInput.responseBuilder
         .speak(speechText)
-        .withSimpleCard('Hello World', speechText)
+        .withSimpleCard('Fizz Buzz', speechText)
         .withShouldEndSession(false)
         .getResponse();
     }
@@ -92,7 +93,7 @@ const SessionEndedRequestHandler = {
         return handlerInput.requestEnvelope.request.type === 'SessionEndedRequest';
     },
     handle(handlerInput) {
-        //any cleanup logic goes here
+    
         return handlerInput.responseBuilder.getResponse();
     }
 };
@@ -114,7 +115,7 @@ const ErrorHandler = {
     },
   };
 
-
+// handles when alexa doesn't understand the response, prompts the user to try again
 const FallBackIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -130,26 +131,18 @@ const FallBackIntentHandler = {
     }
 };
 
+// change the gamemode to hard -> make the number larger
 const HardModeIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && handlerInput.requestEnvelope.request.intent.name === 'HardModeIntent';
     },
     handle(handlerInput) {
-    
+        // generate numbers >= 50 to 200
         const harderNumber = Math.floor(Math.random() * 200) + 50  
         const nextResponseNumber = harderNumber + 1
         const correctAnswer = checkFizzBuzz(nextResponseNumber)
-        const sessionAttributes = {}
-        Object.assign(sessionAttributes, {
-            lastNumber: harderNumber,
-            currentNumber: nextResponseNumber,
-            correctAnswer: correctAnswer
-            
-            
-        });
-
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        setSessionAttributes(harderNumber, nextResponseNumber, correctAnswer)
         speakOutput = `so you like a challenge. is this too easy? let's make it a little harder for you. I'll start... ${harderNumber}`
         repromptOutput = `${harderNumber}`
         return handlerInput.responseBuilder
@@ -166,17 +159,13 @@ const HardModeIntentHandler = {
 
 // start the game and set session attributes to save progress
 function startGame(handlerInput) {
-    const speechOutput = "Welcome to Fizz Buzz. We’ll each take turns counting up from one. However, you must replace numbers divisible by 3 with the word “fizz” and you must replace numbers divisible by 5 with the word “buzz”. If a number is divisible by both 3 and 5, you should instead say “fizz buzz”. If you get one wrong, you lose. ... OK, I’ll start... One."
+    const speechOutput = "Welcome to Fizz Buzz. We’ll each take turns counting up from one. However, you must replace numbers divisible by 3 with the word “fizz” and you must replace numbers divisible by 5 with the word “buzz”. If a number is divisible by both 3 and 5, you should instead say “fizz buzz”. If you get one wrong, you lose... OK, I’ll start... One."
     // initialize game and set session attributes
-    const sessionAttributes = {}
-    Object.assign(sessionAttributes, {
-        lastNumber: 14,
-        currentNumber: 15,
-        correctAnswer: 'fizzbuzz'
-        
-        
-      });
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    
+    const startingNumber = 1
+    const nextResponseNumber = startingNumber + 1
+    const correctAnswer = checkFizzBuzz(nextResponseNumber)
+    setSessionAttributes(startingNumber, nextResponseNumber, correctAnswer, handlerInput)
     return handlerInput.responseBuilder
     .speak(speechOutput)
     .reprompt(speechOutput)
@@ -202,7 +191,9 @@ function handlerUserAnswer(handlerInput) {
     var speechOutput = ""
     var sessionEnd = false
     var userAnswer = null
-    if (userAnswer.Answer.value) {
+
+    // check if answer is a number or word
+    if (userResponse.Answer.value) {
         userAnswer = userResponse.Answer.value
     }
     else {
@@ -215,15 +206,8 @@ function handlerUserAnswer(handlerInput) {
         speechOutput = checkFizzBuzz(nextNumber).toString()
         correctAnswer = checkFizzBuzz(nextResponseNumber)
         
-        const sessionAttributes = {}
-        Object.assign(sessionAttributes, {
-            lastNumber: nextNumber,
-            currentNumber: nextResponseNumber,
-            correctAnswer: correctAnswer
-            
-        });
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
-        
+       
+        setSessionAttributes(nextNumber, nextResponseNumber, correctAnswer, handlerInput)
 
     } else {
         sessionEnd = true
@@ -237,29 +221,7 @@ function handlerUserAnswer(handlerInput) {
 
 }
 
-function checkFizzBuzz(number) {
-    if (number % 3 == 0 && number % 5 == 0) {
-        
-        return "fizzbuzz"
-        
-    }
-    else if (number % 3 == 0) {
-        
-        correctAnswer = "fizz"
-       
-        return "fizz"
-    }
-    else if (number % 5 == 0) {
-        
-        correctAnswer = "buzz"
-        
-        return "buzz"
-    }
-    else {
-        
-        return number
-    }
-}
+
 
 
 exports.handler = Alexa.SkillBuilders.custom()
