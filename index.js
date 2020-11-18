@@ -13,13 +13,17 @@ const LaunchRequestHandler = {
   }
 };
 
+
 // handle intent request and check if it is an answer intent
 const AnswerIntentHandler = {
+    
     canHandle(handlerInput) {
+        console.log(handlerInput.requestEnvelope.request.intent.name)
       return handlerInput.requestEnvelope.request.type === 'IntentRequest'
         && handlerInput.requestEnvelope.request.intent.name === 'AnswerIntent';
     },
     handle(handlerInput) {
+        console.log(".////////////")
         return handlerUserAnswer(handlerInput)
         
     }
@@ -105,10 +109,12 @@ const ErrorHandler = {
       return handlerInput.responseBuilder
         .speak('Sorry, I did not understand your response, please try again.')
         .reprompt('Sorry, I did not understand your response, please try again.')
+        .withShouldEndSession(false)
         .getResponse();
     },
   };
-  
+
+
 const FallBackIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -119,25 +125,62 @@ const FallBackIntentHandler = {
         return handlerInput.responseBuilder
         .speak('Sorry, I did not understand your response, please try again.')
         .reprompt('Sorry, I did not understand your response, please try again.')
+        .withShouldEndSession(false)
         .getResponse();
     }
 };
+
+const HardModeIntentHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+        && handlerInput.requestEnvelope.request.intent.name === 'HardModeIntent';
+    },
+    handle(handlerInput) {
+    
+        const harderNumber = Math.floor(Math.random() * 200) + 50  
+        const nextResponseNumber = harderNumber + 1
+        const correctAnswer = checkFizzBuzz(nextResponseNumber)
+        const sessionAttributes = {}
+        Object.assign(sessionAttributes, {
+            lastNumber: harderNumber,
+            currentNumber: nextResponseNumber,
+            correctAnswer: correctAnswer
+            
+            
+        });
+
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        speakOutput = `so you like a challenge. is this too easy? let's make it a little harder for you. I'll start... ${harderNumber}`
+        repromptOutput = `${harderNumber}`
+        return handlerInput.responseBuilder
+        .speak(speakOutput)
+        .reprompt(repromptOutput)
+        .withShouldEndSession(false)
+        .getResponse()
+        
+    }
+};
+
+
+
+
 // start the game and set session attributes to save progress
 function startGame(handlerInput) {
-    const speechOutput = "Welcome to Fizz Buzz. Weâ€™ll each take turns counting up from one. However, you must replace numbers divisible by 3 with the word â€œfizzâ€ and you must replace numbers divisible by 5 with the word â€œbuzzâ€. If a number is divisible by both 3 and 5, you should instead say â€œfizz buzzâ€. If you get one wrong, you lose. ... OK, Iâ€™ll start... One."
+    const speechOutput = "Welcome to Fizz Buzz. We’ll each take turns counting up from one. However, you must replace numbers divisible by 3 with the word “fizz” and you must replace numbers divisible by 5 with the word “buzz”. If a number is divisible by both 3 and 5, you should instead say “fizz buzz”. If you get one wrong, you lose. ... OK, I’ll start... One."
     // initialize game and set session attributes
     const sessionAttributes = {}
     Object.assign(sessionAttributes, {
         lastNumber: 14,
         currentNumber: 15,
-        correctAnswer: 'fizz buzz',
-        score: 0
+        correctAnswer: 'fizzbuzz'
+        
         
       });
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
     return handlerInput.responseBuilder
     .speak(speechOutput)
     .reprompt(speechOutput)
+    .withShouldEndSession(false)
     .getResponse();
 
 }
@@ -145,17 +188,28 @@ function startGame(handlerInput) {
 
 // handle user responses and determine if it is valid and correct
 function handlerUserAnswer(handlerInput) {
+
+
+    console.log("hit")
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     const currentNumber = sessionAttributes.currentNumber
     const { intent } = handlerInput.requestEnvelope.request
-    const userAnswer = intent.slots.Answer.value
+    const userResponse = intent.slots
+    
     var correctAnswer = sessionAttributes.correctAnswer
     const nextNumber = currentNumber + 1
     const nextResponseNumber = currentNumber + 2
     var speechOutput = ""
     var sessionEnd = false
+    var userAnswer = null
+    if (userAnswer.Answer.value) {
+        userAnswer = userResponse.Answer.value
+    }
+    else {
+        userAnswer = userResponse.GameAns.value
+    }
     // determine if user answer is correct and set the session attributes for the next input
-    if (userAnswer == correctAnswer) {
+    if (userAnswer.replace(/\s+/g, '') == correctAnswer) {
         
         // set the session attributes for the next input
         speechOutput = checkFizzBuzz(nextNumber).toString()
@@ -165,8 +219,8 @@ function handlerUserAnswer(handlerInput) {
         Object.assign(sessionAttributes, {
             lastNumber: nextNumber,
             currentNumber: nextResponseNumber,
-            correctAnswer: correctAnswer,
-            score: 0
+            correctAnswer: correctAnswer
+            
         });
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
         
@@ -186,7 +240,7 @@ function handlerUserAnswer(handlerInput) {
 function checkFizzBuzz(number) {
     if (number % 3 == 0 && number % 5 == 0) {
         
-        return "fizz buzz"
+        return "fizzbuzz"
         
     }
     else if (number % 3 == 0) {
@@ -216,6 +270,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,
     FallBackIntentHandler,
+    HardModeIntentHandler,
     RepeatIntentHandler)
     .addErrorHandlers(ErrorHandler)
     .lambda();
