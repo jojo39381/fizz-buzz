@@ -20,7 +20,7 @@ const AnswerIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'AnswerIntent';
     },
     handle(handlerInput) {
-        handlerUserAnswer(handlerInput)
+        return handlerUserAnswer(handlerInput)
         
     }
   };
@@ -43,22 +43,41 @@ function startGame(handlerInput) {
 }
 
 function handlerUserAnswer(handlerInput) {
-    const sessionAttributes = attributesManager.getSessionAttributes();
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
     const currentNumber = sessionAttributes.currentNumber
     const { intent } = handlerInput.requestEnvelope.request
     const userAnswer = intent.slots.Answer.value
-    const speechOutput = ""
+    var correctAnswer = sessionAttributes.correctAnswer
+    const nextNumber = currentNumber + 1
+    const nextResponseNumber = currentNumber + 2
+    var speechOutput = ""
+    
+
     if (userAnswer == correctAnswer) {
+        if (nextResponseNumber % 3 == 0 && nextResponseNumber % 5 == 0) {
+            correctAnswer = "fizz buzz"
+            
+        }
+        if (nextResponseNumber % 3 == 0) {
+            correctAnswer = "fizz"
+        }
+        if (nextResponseNumber % 5 == 0) {
+            correctAnswer = "buzz"
+        }
+        else {
+            correctAnswer = nextResponseNumber
+        }
         const sessionAttributes = {}
         Object.assign(sessionAttributes, {
-            currentNumber: 2,
-            correctAnswer: 2,
+            currentNumber: nextResponseNumber,
+            correctAnswer: correctAnswer,
             score: 0
         });
-        speechOutput = (currentNumber + 1).toString()
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
+        speechOutput = (nextNumber).toString()
 
     } else {
-        speechOutput = "I'm sorry, the correct response was . You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz"
+        speechOutput = "Iâ€™m sorry, the correct response was " + correctAnswer + "You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz"
     }
     return handlerInput.responseBuilder
     .speak(speechOutput)
