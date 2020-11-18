@@ -48,6 +48,20 @@ function startGame(handlerInput) {
 
 }
 
+// handle user responses and determine if it is valid and correct
+function handlerUserAnswer(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    const currentNumber = sessionAttributes.currentNumber
+    const { intent } = handlerInput.requestEnvelope.request
+    const userAnswer = intent.slots.Answer.value
+    var correctAnswer = sessionAttributes.correctAnswer
+    const nextNumber = currentNumber + 1
+    const nextResponseNumber = currentNumber + 2
+    var speechOutput = ""
+    
+
+}
+
 
 
 
