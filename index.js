@@ -54,7 +54,7 @@ function handlerUserAnswer(handlerInput) {
     
 
     if (userAnswer == correctAnswer) {
-        print(nextResponseNumber)
+        console.log(nextResponseNumber)
         if (nextResponseNumber % 3 == 0 && nextResponseNumber % 5 == 0) {
             correctAnswer = "fizz buzz"
             
